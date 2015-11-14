@@ -1,0 +1,124 @@
+# Copyright (c) 2015 yquant.com. All rights reserved.
+# Use of this source code is governed by LGPL with static linking exception
+# that can be found in the LICENSE file.
+
+yajl_sources = [
+  "src/api/yajl_common.h",
+  "src/api/yajl_gen.h",
+  "src/api/yajl_parse.h",
+  "src/api/yajl_tree.h",
+  "src/api/yajl_version.h",
+  "src/yajl_alloc.h",
+  "src/yajl_buf.h",
+  "src/yajl_encode.h",
+  "src/yajl_lex.h",
+  "src/yajl_parser.h",
+  "src/yajl.c",
+  "src/yajl_alloc.c",
+  "src/yajl_buf.c",
+  "src/yajl_encode.c",
+  "src/yajl_gen.c",
+  "src/yajl_lex.c",
+  "src/yajl_parser.c",
+  "src/yajl_tree.c",
+  "src/yajl_version.c",
+]
+  
+config("yajl_public_config") {
+  include_dirs = [ "include" ]
+}
+
+config("disable_warnings_config") {
+  if (is_win) {
+    cflags = [
+      "/wd4005",
+      "/wd4100",
+      "/wd4130",
+      "/wd4255",
+      "/wd4267",
+      "/wd4711",
+      "/wd4996",
+    ]
+  } else {
+    cflags = [
+      "-Wpointer-arith",
+      "-Wno-format-y2k",
+      "-Wstrict-prototypes",
+      "-Wmissing-declarations",
+      "-Wnested-externs",
+      "-Wextra",
+      "-Wundef",
+      "-Wwrite-strings",
+      "-Wold-style-definition",
+      "-Wredundant-decls",
+      "-Wno-unused-parameter",
+      "-Wno-sign-compare",
+      "-Wmissing-prototypes",
+    ]
+  }
+}
+
+config("yajl_config") {
+  include_dirs = [
+    "src/",
+  ]
+  
+  if (!is_win) {
+    cflags = [
+      "-std=c99",
+      "-pedantic",
+      "-Wall",
+    ]
+  }
+}
+
+static_library("yajl_static") {
+  sources = yajl_sources
+  
+  configs += [
+    ":yajl_config",
+    ":disable_warnings_config",
+  ]
+
+  public_configs = [
+    ":yajl_public_config",
+  ]
+}
+
+config("yajl_shared_public_config") {
+  if (is_win) {
+    defines = [ "YAJL_SHARED=1" ]
+  }
+}
+
+shared_library("yajl_shared") {
+  sources = yajl_sources
+  
+  output_name = "yajl"
+
+  defines = [ "YAJL_BUILD=1" ]
+  
+  if (!is_win) {
+    cflags = [ "-fPIC" ]
+  }
+  
+  configs += [
+    ":yajl_config",
+    ":disable_warnings_config",
+  ]
+
+  public_configs = [
+    ":yajl_public_config",
+    ":yajl_shared_public_config",
+  ]
+}
+
+executable("yajl-example") {
+  sources = [
+    "example/parse_config.c",
+  ]
+  
+  deps = [
+    ":yajl_static"
+  ]
+}
