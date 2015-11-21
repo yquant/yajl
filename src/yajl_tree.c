@@ -21,7 +21,6 @@
 #include <assert.h>
 
 #include "api/yajl_tree.h"
-#include "api/yajl_parse.h"
 
 #include "yajl_parser.h"
 
@@ -397,40 +396,43 @@ static int handle_null (void *ctx)
     return ((context_add_value (ctx, v) == 0) ? STATUS_CONTINUE : STATUS_ABORT);
 }
 
+static const yajl_callbacks callbacks =
+    {
+        /* null        = */ handle_null,
+        /* boolean     = */ handle_boolean,
+        /* integer     = */ NULL,
+        /* double      = */ NULL,
+        /* number      = */ handle_number,
+        /* string      = */ handle_string,
+        /* start map   = */ handle_start_map,
+        /* map key     = */ handle_string,
+        /* end map     = */ handle_end_map,
+        /* start array = */ handle_start_array,
+        /* end array   = */ handle_end_array
+    };
+
 /*
  * Public functions
  */
-yajl_val yajl_tree_parse (const char *input,
+const yajl_callbacks* yajl_tree_default_callbacks()
+{
+    return &callbacks;
+}
+
+yajl_val yajl_tree_parse (yajl_handle handle, const char *input,
                           char *error_buffer, size_t error_buffer_size)
 {
-    static const yajl_callbacks callbacks =
-        {
-            /* null        = */ handle_null,
-            /* boolean     = */ handle_boolean,
-            /* integer     = */ NULL,
-            /* double      = */ NULL,
-            /* number      = */ handle_number,
-            /* string      = */ handle_string,
-            /* start map   = */ handle_start_map,
-            /* map key     = */ handle_string,
-            /* end map     = */ handle_end_map,
-            /* start array = */ handle_start_array,
-            /* end array   = */ handle_end_array
-        };
-
-    yajl_handle handle;
     yajl_status status;
     char * internal_err_str;
-	context_t ctx = { NULL, NULL, NULL, 0 };
+    context_t ctx = { NULL, NULL, NULL, 0 };
 
-	ctx.errbuf = error_buffer;
-	ctx.errbuf_size = error_buffer_size;
+    ctx.errbuf = error_buffer;
+    ctx.errbuf_size = error_buffer_size;
 
     if (error_buffer != NULL)
         memset (error_buffer, 0, error_buffer_size);
 
-    handle = yajl_alloc (&callbacks, NULL, &ctx);
-    yajl_config(handle, yajl_allow_comments, 1);
+    handle->ctx = &ctx;
 
     status = yajl_parse(handle,
                         (unsigned char *) input,
@@ -444,11 +446,9 @@ yajl_val yajl_tree_parse (const char *input,
              snprintf(error_buffer, error_buffer_size, "%s", internal_err_str);
              YA_FREE(&(handle->alloc), internal_err_str);
         }
-        yajl_free (handle);
         return NULL;
     }
 
-    yajl_free (handle);
     return (ctx.root);
 }
 

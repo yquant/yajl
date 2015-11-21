@@ -159,8 +159,10 @@ yajl_status
 yajl_do_finish(yajl_handle hand)
 {
     yajl_status stat;
+    size_t bytesConsumed = hand->bytesConsumed;
     stat = yajl_do_parse(hand,(const unsigned char *) " ",1);
-
+    hand->bytesConsumed = bytesConsumed;
+    
     if (stat != yajl_status_ok) return stat;
 
     switch(yajl_bs_current(hand->stateStack))

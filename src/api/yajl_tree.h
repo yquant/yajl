@@ -32,6 +32,7 @@
 #define YAJL_TREE_H 1
 
 #include <yajl/yajl_common.h>
+#include <yajl/yajl_parse.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,11 +98,23 @@ struct yajl_val_s
 };
 
 /**
+ * Get default callbacks used by \em yajl_tree_parse.
+ *
+ * Get default callbacks used by \em yajl_tree_parse, which could be used by    
+ * \em yajl_alloc to alloc a handle to the json parser.
+ *
+ * \returns Pointer to the default callbacks.
+ */
+YAJL_API const yajl_callbacks* yajl_tree_default_callbacks();
+
+/**
  * Parse a string.
  *
  * Parses an null-terminated string containing JSON data and returns a pointer
  * to the top-level value (root of the parse tree).
  *
+ * \param handle             A handle to the json parser allocated with 
+ *                           \em yajl_alloc.
  * \param input              Pointer to a null-terminated utf8 string containing
  *                           JSON data.
  * \param error_buffer       Pointer to a buffer in which an error message will
@@ -118,8 +131,10 @@ struct yajl_val_s
  * null terminated message describing the error in more detail is stored in
  * \em error_buffer if it is not \c NULL.
  */
-YAJL_API yajl_val yajl_tree_parse (const char *input,
-                                   char *error_buffer, size_t error_buffer_size);
+YAJL_API yajl_val yajl_tree_parse (yajl_handle handle,
+                                   const char *input,
+                                   char *error_buffer,
+                                   size_t error_buffer_size);
 
 
 /**
