@@ -105,7 +105,7 @@ struct yajl_val_s
  *
  * \returns Pointer to the default callbacks.
  */
-YAJL_API const yajl_callbacks* yajl_tree_default_callbacks();
+YAJL_API const yajl_callbacks* yajl_tree_default_callbacks(void);
 
 /**
  * Parse a string.

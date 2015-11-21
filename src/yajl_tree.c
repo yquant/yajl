@@ -414,7 +414,7 @@ static const yajl_callbacks callbacks =
 /*
  * Public functions
  */
-const yajl_callbacks* yajl_tree_default_callbacks()
+const yajl_callbacks* yajl_tree_default_callbacks(void)
 {
     return &callbacks;
 }
