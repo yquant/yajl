@@ -28,6 +28,7 @@ typedef enum {
     yajl_state_parse_complete,
     yajl_state_parse_error,
     yajl_state_lexical_error,
+    yajl_state_malloc_error,
     yajl_state_map_start,
     yajl_state_map_sep,
     yajl_state_map_need_val,

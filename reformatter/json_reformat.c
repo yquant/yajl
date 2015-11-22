@@ -130,11 +130,20 @@ main(int argc, char ** argv)
     int a = 1;
 
     g = yajl_gen_alloc(NULL);
+    if (g == NULL) {
+        fprintf(stderr, "out of memory.\n");
+        return 1;
+    }
     yajl_gen_config(g, yajl_gen_beautify, 1);
     yajl_gen_config(g, yajl_gen_validate_utf8, 1);
 
     /* ok.  open file.  let's read and parse */
     hand = yajl_alloc(&callbacks, NULL, (void *) g);
+    if (hand == NULL) {
+        yajl_gen_free(g);
+        fprintf(stderr, "out of memory.\n");
+        return 1;
+    }
     /* and let's allow comments by default */
     yajl_config(hand, yajl_allow_comments, 1);
 
@@ -198,8 +207,8 @@ main(int argc, char ** argv)
 
     if (stat != yajl_status_ok) {
         unsigned char * str = yajl_get_error(hand, 1, fileData, rd);
-        fprintf(stderr, "%s", (const char *) str);
-        yajl_free_error(hand, str);
+        fprintf(stderr, "%s", (const char *) (str ? str : "error on parse.\n"));
+        if (str) yajl_free_error(hand, str);
         retval = 1;
     }
 

@@ -62,6 +62,9 @@ yajl_alloc(const yajl_callbacks * callbacks,
     }
 
     hand = (yajl_handle) YA_MALLOC(afs, sizeof(struct yajl_handle_t));
+    if (hand == NULL) {
+        return NULL;
+    }
 
     /* copy in pointers to allocation routines */
     memcpy((void *) &(hand->alloc), (void *) afs, sizeof(yajl_alloc_funcs));
@@ -71,6 +74,10 @@ yajl_alloc(const yajl_callbacks * callbacks,
     hand->lexer = NULL; 
     hand->bytesConsumed = 0;
     hand->decodeBuf = yajl_buf_alloc(&(hand->alloc));
+    if (hand->decodeBuf == NULL) {
+        yajl_free(hand);
+        return NULL;
+    }
     hand->flags	    = 0;
     yajl_bs_init(hand->stateStack, &(hand->alloc));
     yajl_bs_push(hand->stateStack, yajl_state_start);
@@ -115,7 +122,7 @@ void
 yajl_free(yajl_handle handle)
 {
     yajl_bs_free(handle->stateStack);
-    yajl_buf_free(handle->decodeBuf);
+    if (handle->decodeBuf) yajl_buf_free(handle->decodeBuf);
     if (handle->lexer) {
         yajl_lex_free(handle->lexer);
         handle->lexer = NULL;
@@ -134,6 +141,10 @@ yajl_parse(yajl_handle hand, const unsigned char * jsonText,
         hand->lexer = yajl_lex_alloc(&(hand->alloc),
                                      hand->flags & yajl_allow_comments,
                                      !(hand->flags & yajl_dont_validate_strings));
+        if (hand->lexer == NULL) {
+            yajl_bs_set(hand->stateStack, yajl_state_malloc_error);
+            return yajl_status_error;
+        }
     }
 
     status = yajl_do_parse(hand, jsonText, jsonTextLen);
@@ -154,6 +165,10 @@ yajl_complete_parse(yajl_handle hand)
         hand->lexer = yajl_lex_alloc(&(hand->alloc),
                                      hand->flags & yajl_allow_comments,
                                      !(hand->flags & yajl_dont_validate_strings));
+        if (hand->lexer == NULL) {
+            yajl_bs_set(hand->stateStack, yajl_state_malloc_error);
+            return yajl_status_error;
+        }
     }
 
     return yajl_do_finish(hand);

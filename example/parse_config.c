@@ -56,6 +56,10 @@ main(int argc, char **argv)
     }
 
     yajl_handle handle = yajl_alloc(yajl_tree_default_callbacks(), NULL, NULL);
+    if (handle == NULL) {
+        fprintf(stderr, "out of memory.\n");
+        return 1;
+    }
     yajl_config(handle, yajl_allow_comments, 1);
     yajl_config(handle, yajl_allow_trailing_garbage, 1);
 

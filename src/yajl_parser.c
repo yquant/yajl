@@ -78,6 +78,8 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
     } else if (yajl_bs_current(hand->stateStack) == yajl_state_lexical_error) {
         errorType = "lexical";
         errorText = yajl_lex_error_to_string(yajl_lex_get_error(hand->lexer));
+    } else if (yajl_bs_current(hand->stateStack) == yajl_state_malloc_error) {
+        errorType = "malloc";
     } else {
         errorType = "unknown";
     }

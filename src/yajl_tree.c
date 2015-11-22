@@ -443,8 +443,9 @@ yajl_val yajl_tree_parse (yajl_handle handle, const char *input,
                internal_err_str = (char *) yajl_get_error(handle, 1,
                      (const unsigned char *) input,
                      strlen(input));
-             snprintf(error_buffer, error_buffer_size, "%s", internal_err_str);
-             YA_FREE(&(handle->alloc), internal_err_str);
+             snprintf(error_buffer, error_buffer_size, "%s",
+                      internal_err_str ? internal_err_str : "internal error");
+             if (internal_err_str) YA_FREE(&(handle->alloc), internal_err_str);
         }
         return NULL;
     }

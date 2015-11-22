@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define YAJL_BUF_INIT_SIZE 2048
 
@@ -40,6 +41,10 @@ void yajl_buf_ensure_available(yajl_buf buf, size_t want)
     if (buf->data == NULL) {
         buf->len = YAJL_BUF_INIT_SIZE;
         buf->data = (unsigned char *) YA_MALLOC(buf->alloc, buf->len);
+        if (buf->data == NULL) {
+            fprintf(stderr, "out of memory, aborted.\n");
+            exit(1);
+        }
         buf->data[0] = 0;
     }
 
@@ -49,6 +54,10 @@ void yajl_buf_ensure_available(yajl_buf buf, size_t want)
 
     if (need != buf->len) {
         buf->data = (unsigned char *) YA_REALLOC(buf->alloc, buf->data, need);
+        if (buf->data == NULL) {
+            fprintf(stderr, "out of memory, aborted.\n");
+            exit(1);
+        }
         buf->len = need;
     }
 }
@@ -56,6 +65,9 @@ void yajl_buf_ensure_available(yajl_buf buf, size_t want)
 yajl_buf yajl_buf_alloc(yajl_alloc_funcs * alloc)
 {
     yajl_buf b = YA_MALLOC(alloc, sizeof(struct yajl_buf_t));
+    if (b == NULL) {
+        return NULL;
+    }
     memset((void *) b, 0, sizeof(struct yajl_buf_t));
     b->alloc = alloc;
     return b;

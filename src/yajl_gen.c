@@ -120,6 +120,10 @@ yajl_gen_alloc(const yajl_alloc_funcs * afs)
 
     g->print = (yajl_print_t)&yajl_buf_append;
     g->ctx = yajl_buf_alloc(&(g->alloc));
+    if (g->ctx == NULL) {
+        yajl_gen_free(g);
+        return NULL;
+    }
     g->indentString = "    ";
 
     return g;
@@ -136,7 +140,8 @@ yajl_gen_reset(yajl_gen g, const char * sep)
 void
 yajl_gen_free(yajl_gen g)
 {
-    if (g->print == (yajl_print_t)&yajl_buf_append) yajl_buf_free((yajl_buf)g->ctx);
+    if (g->print == (yajl_print_t)&yajl_buf_append && g->ctx)
+        yajl_buf_free((yajl_buf)g->ctx);
     YA_FREE(&(g->alloc), g);
 }
 

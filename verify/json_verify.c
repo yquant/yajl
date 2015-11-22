@@ -46,6 +46,10 @@ main(int argc, char ** argv)
 
     /* allocate a parser */
     hand = yajl_alloc(NULL, NULL, NULL);
+    if (hand == NULL) {
+        fprintf(stderr, "out of memory.\n");
+        return 1;
+    }
 
     /* check arguments.*/
     while ((a < argc) && (argv[a][0] == '-') && (strlen(argv[a]) > 1)) {
@@ -104,8 +108,8 @@ main(int argc, char ** argv)
     {
         if (!quiet) {
             unsigned char * str = yajl_get_error(hand, 1, fileData, rd);
-            fprintf(stderr, "%s", (const char *) str);
-            yajl_free_error(hand, str);
+            fprintf(stderr, "%s", (const char *)(str ? str : "parse error.\n"));
+            if (str) yajl_free_error(hand, str);
         }
         retval = 1;
     }
